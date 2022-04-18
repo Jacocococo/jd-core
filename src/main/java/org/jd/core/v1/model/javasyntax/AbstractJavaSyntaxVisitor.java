@@ -184,6 +184,12 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeArgumentVisi
     public void visit(ModuleDeclaration declarations) {}
 
     @Override
+    public void visit(RecordDeclaration declaration) {
+        safeAccept(declaration.getAnnotationReferences());
+        safeAccept(declaration.getBodyDeclaration());
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
     public void visit(TypeDeclarations list) {
         acceptListDeclaration(list);

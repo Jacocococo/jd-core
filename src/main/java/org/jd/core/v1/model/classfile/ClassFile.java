@@ -56,6 +56,7 @@ public class ClassFile {
     public boolean isInterface()  { return (accessFlags & ACC_INTERFACE) != 0; }
     public boolean isModule()     { return (accessFlags & ACC_MODULE) != 0; }
     public boolean isStatic()     { return (accessFlags & ACC_STATIC) != 0; }
+    public boolean isRecord()     { return getSuperTypeName().equals("java/lang/Record"); }
 
     public String getInternalTypeName() {
         return internalTypeName;

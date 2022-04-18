@@ -63,6 +63,12 @@ public class InitStaticFieldVisitor extends AbstractJavaSyntaxVisitor {
     }
 
     @Override
+    public void visit(RecordDeclaration declaration) {
+        this.internalTypeName = declaration.getInternalTypeName();
+        safeAccept(declaration.getBodyDeclaration());
+    }
+
+    @Override
     public void visit(BodyDeclaration declaration) {
         ClassFileBodyDeclaration bodyDeclaration = (ClassFileBodyDeclaration)declaration;
 

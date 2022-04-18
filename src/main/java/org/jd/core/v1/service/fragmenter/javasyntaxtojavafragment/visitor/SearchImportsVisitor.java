@@ -336,6 +336,12 @@ public class SearchImportsVisitor extends AbstractJavaSyntaxVisitor {
             safeAccept(declaration.getBodyDeclaration());
         }
 
+        @Override
+        public void visit(RecordDeclaration declaration) {
+            mainTypeNames.add(getTypeName(declaration.getInternalTypeName()));
+            safeAccept(declaration.getBodyDeclaration());
+        }
+
         @Override public void visit(FieldDeclaration declaration) {}
         @Override public void visit(ConstructorDeclaration declaration) {}
         @Override public void visit(MethodDeclaration declaration) {}

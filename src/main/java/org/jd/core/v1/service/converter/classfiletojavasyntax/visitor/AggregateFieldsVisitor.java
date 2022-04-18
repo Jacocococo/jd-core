@@ -40,4 +40,9 @@ public class AggregateFieldsVisitor extends AbstractJavaSyntaxVisitor {
     public void visit(InterfaceDeclaration declaration) {
         safeAccept(declaration.getBodyDeclaration());
     }
+
+    @Override
+    public void visit(RecordDeclaration declaration) {
+        safeAccept(declaration.getBodyDeclaration());
+    }
 }

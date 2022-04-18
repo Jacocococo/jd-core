@@ -55,6 +55,11 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
     }
 
     @Override
+    public void visit(RecordDeclaration declaration) {
+        safeAccept(declaration.getBodyDeclaration());
+    }
+
+    @Override
     public void visit(BodyDeclaration declaration) {
         ClassFileBodyDeclaration bodyDeclaration = (ClassFileBodyDeclaration)declaration;
 
@@ -309,7 +314,7 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
 
             safeAccept(declaration.getStatements());
 
-            if (! finalLocalVariableNameMap.isEmpty()) {
+            if (!finalLocalVariableNameMap.isEmpty()) {
                 UpdateParametersAndLocalVariablesVisitor visitor = new UpdateParametersAndLocalVariablesVisitor();
 
                 declaration.getStatements().accept(visitor);
@@ -319,7 +324,7 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
                 }
             }
 
-            if (! localClassDeclarations.isEmpty()) {
+            if (!localClassDeclarations.isEmpty()) {
                 localClassDeclarations.sort(new MemberDeclarationComparator());
                 declaration.accept(new AddLocalClassDeclarationVisitor());
             }
@@ -331,7 +336,7 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
             localClassDeclarations.clear();
             safeAccept(declaration.getStatements());
 
-            if (! finalLocalVariableNameMap.isEmpty()) {
+            if (!finalLocalVariableNameMap.isEmpty()) {
                 UpdateParametersAndLocalVariablesVisitor visitor = new UpdateParametersAndLocalVariablesVisitor();
 
                 declaration.getStatements().accept(visitor);
@@ -341,7 +346,7 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
                 }
             }
 
-            if (! localClassDeclarations.isEmpty()) {
+            if (!localClassDeclarations.isEmpty()) {
                 localClassDeclarations.sort(new MemberDeclarationComparator());
                 declaration.accept(new AddLocalClassDeclarationVisitor());
             }
@@ -353,11 +358,11 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
             localClassDeclarations.clear();
             safeAccept(declaration.getStatements());
 
-            if (! finalLocalVariableNameMap.isEmpty()) {
+            if (!finalLocalVariableNameMap.isEmpty()) {
                 declaration.getStatements().accept(new UpdateParametersAndLocalVariablesVisitor());
             }
 
-            if (! localClassDeclarations.isEmpty()) {
+            if (!localClassDeclarations.isEmpty()) {
                 localClassDeclarations.sort(new MemberDeclarationComparator());
                 declaration.accept(new AddLocalClassDeclarationVisitor());
             }

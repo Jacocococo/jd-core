@@ -38,6 +38,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
     public static final KeywordToken PROTECTED = new KeywordToken("protected");
     public static final KeywordToken PUBLIC = new KeywordToken("public");
     public static final KeywordToken STATIC = new KeywordToken("static");
+    public static final KeywordToken RECORD = new KeywordToken("record");
     public static final KeywordToken THROWS = new KeywordToken("throws");
 
     public static final TextToken COMMENT_BRIDGE = new TextToken("/* bridge */");
@@ -213,7 +214,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
         if ((declaration.getFlags() & FLAG_SYNTHETIC) == 0) {
             fragments.add(StartMovableJavaBlockFragment.START_MOVABLE_TYPE_BLOCK);
 
-            buildFragmentsForClassOrInterfaceDeclaration(declaration, declaration.getFlags(), CLASS);
+            buildFragmentsForClassOrInterfaceOrRecordDeclaration(declaration, declaration.getFlags(), CLASS);
 
             tokens.add(StartBlockToken.START_DECLARATION_OR_STATEMENT_BLOCK);
 
@@ -773,7 +774,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
         if ((declaration.getFlags() & FLAG_SYNTHETIC) == 0) {
             fragments.add(StartMovableJavaBlockFragment.START_MOVABLE_TYPE_BLOCK);
 
-            buildFragmentsForClassOrInterfaceDeclaration(declaration, declaration.getFlags() & ~FLAG_ABSTRACT, INTERFACE);
+            buildFragmentsForClassOrInterfaceOrRecordDeclaration(declaration, declaration.getFlags() & ~FLAG_ABSTRACT, INTERFACE);
 
             tokens.add(StartBlockToken.START_DECLARATION_OR_STATEMENT_BLOCK);
 
@@ -797,6 +798,78 @@ public class CompilationUnitVisitor extends StatementVisitor {
             fragments.addTokensFragment(tokens);
 
             BodyDeclaration bodyDeclaration = declaration.getBodyDeclaration();
+            if (bodyDeclaration == null) {
+                tokens.add(TextToken.SPACE);
+                tokens.add(TextToken.LEFTRIGHTCURLYBRACKETS);
+            } else {
+                int fragmentCount1 = fragments.size();
+                StartBodyFragment start = JavaFragmentFactory.addStartTypeBody(fragments);
+                int fragmentCount2 = fragments.size();
+
+                storeContext();
+                currentInternalTypeName = declaration.getInternalTypeName();
+                currentTypeName = declaration.getName();
+                bodyDeclaration.accept(this);
+                restoreContext();
+
+                if (fragmentCount2 == fragments.size()) {
+                    fragments.subList(fragmentCount1, fragmentCount2).clear();
+                    tokens.add(TextToken.SPACE);
+                    tokens.add(TextToken.LEFTRIGHTCURLYBRACKETS);
+                } else {
+                    JavaFragmentFactory.addEndTypeBody(fragments, start);
+                }
+            }
+
+            fragments.add(EndMovableJavaBlockFragment.END_MOVABLE_BLOCK);
+        }
+    }
+
+    @Override
+    public void visit(RecordDeclaration declaration) {
+        if ((declaration.getFlags() & FLAG_SYNTHETIC) == 0) {
+            fragments.add(StartMovableJavaBlockFragment.START_MOVABLE_TYPE_BLOCK);
+
+            buildFragmentsForClassOrInterfaceOrRecordDeclaration(declaration, declaration.getFlags(), RECORD);
+            
+            tokens.add(StartBlockToken.START_DECLARATION_OR_STATEMENT_BLOCK);
+
+            BaseFormalParameter formalParameters = declaration.getFormalParameters();
+
+            if (formalParameters == null) {
+                tokens.add(TextToken.LEFTRIGHTROUNDBRACKETS);
+            } else {
+                tokens.add(StartBlockToken.START_PARAMETERS_BLOCK);
+                fragments.addTokensFragment(tokens);
+
+                formalParameters.accept(this);
+
+                tokens = new Tokens();
+                tokens.add(EndBlockToken.END_PARAMETERS_BLOCK);
+            }
+            
+            // Build fragments for interfaces
+            BaseType interfaces = declaration.getInterfaces();
+            if (interfaces != null) {
+                if (!tokens.isEmpty())
+                    fragments.addTokensFragment(tokens);
+
+                JavaFragmentFactory.addSpacerBeforeImplements(fragments);
+
+                tokens = new Tokens();
+                tokens.add(IMPLEMENTS);
+                tokens.add(TextToken.SPACE);
+                interfaces.accept(this);
+                fragments.addTokensFragment(tokens);
+
+                tokens = new Tokens();
+            }
+
+            tokens.add(EndBlockToken.END_DECLARATION_OR_STATEMENT_BLOCK);
+            fragments.addTokensFragment(tokens);
+
+            BodyDeclaration bodyDeclaration = declaration.getBodyDeclaration();
+
             if (bodyDeclaration == null) {
                 tokens.add(TextToken.SPACE);
                 tokens.add(TextToken.LEFTRIGHTCURLYBRACKETS);
@@ -1276,7 +1349,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
         tokens.add(new DeclarationToken(DeclarationToken.TYPE, declaration.getInternalTypeName(), declaration.getName(), null));
     }
 
-    protected void buildFragmentsForClassOrInterfaceDeclaration(InterfaceDeclaration declaration, int flags, KeywordToken keyword) {
+    protected void buildFragmentsForClassOrInterfaceOrRecordDeclaration(InterfaceDeclaration declaration, int flags, KeywordToken keyword) {
         buildFragmentsForTypeDeclaration(declaration, flags, keyword);
 
         // Build tokens for type parameterTypes

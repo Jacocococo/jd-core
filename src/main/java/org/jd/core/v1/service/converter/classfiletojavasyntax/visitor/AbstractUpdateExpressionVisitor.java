@@ -100,6 +100,11 @@ public abstract class AbstractUpdateExpressionVisitor extends AbstractJavaSyntax
     }
 
     @Override
+    public void visit(RecordDeclaration declaration) {
+        visit((InterfaceDeclaration) declaration);
+    }
+
+    @Override
     public void visit(LocalVariableDeclaration declaration) {
         declaration.getLocalVariableDeclarators().accept(this);
     }

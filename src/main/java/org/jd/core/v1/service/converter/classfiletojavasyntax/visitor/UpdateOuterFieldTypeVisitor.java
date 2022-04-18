@@ -7,21 +7,30 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
-import org.jd.core.v1.model.classfile.ClassFile;
 import org.jd.core.v1.model.classfile.ConstantPool;
 import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.model.classfile.attribute.AttributeCode;
 import org.jd.core.v1.model.classfile.constant.ConstantMemberRef;
 import org.jd.core.v1.model.classfile.constant.ConstantNameAndType;
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
-import org.jd.core.v1.model.javasyntax.declaration.*;
-import org.jd.core.v1.model.javasyntax.type.*;
+import org.jd.core.v1.model.javasyntax.declaration.AnnotationDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.BodyDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.ClassDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.ConstructorDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.EnumDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.FieldDeclarator;
+import org.jd.core.v1.model.javasyntax.declaration.InterfaceDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.MethodDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.RecordDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.StaticInitializerDeclaration;
+import org.jd.core.v1.model.javasyntax.type.BaseTypeArgument;
+import org.jd.core.v1.model.javasyntax.type.GenericType;
+import org.jd.core.v1.model.javasyntax.type.TypeArguments;
+import org.jd.core.v1.model.javasyntax.type.TypeParameter;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileBodyDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileConstructorDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileFieldDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
-
-import static org.jd.core.v1.model.classfile.Constants.ACC_STATIC;
 
 public class UpdateOuterFieldTypeVisitor extends AbstractJavaSyntaxVisitor {
     protected TypeMaker typeMaker;
@@ -116,6 +125,11 @@ public class UpdateOuterFieldTypeVisitor extends AbstractJavaSyntaxVisitor {
 
     @Override
     public void visit(InterfaceDeclaration declaration) {
+        safeAccept(declaration.getBodyDeclaration());
+    }
+
+    @Override
+    public void visit(RecordDeclaration declaration) {
         safeAccept(declaration.getBodyDeclaration());
     }
 

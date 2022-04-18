@@ -55,6 +55,11 @@ public class InitInstanceFieldVisitor extends AbstractJavaSyntaxVisitor {
     }
 
     @Override
+    public void visit(RecordDeclaration declaration) {
+        safeAccept(declaration.getBodyDeclaration());
+    }
+
+    @Override
     public void visit(BodyDeclaration declaration) {
         ClassFileBodyDeclaration bodyDeclaration = (ClassFileBodyDeclaration)declaration;
 

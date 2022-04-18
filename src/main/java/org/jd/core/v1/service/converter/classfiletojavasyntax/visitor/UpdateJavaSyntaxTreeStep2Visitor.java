@@ -11,6 +11,7 @@ import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
 import org.jd.core.v1.model.javasyntax.declaration.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileBodyDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileEnumDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileRecordDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 
 public class UpdateJavaSyntaxTreeStep2Visitor extends AbstractJavaSyntaxVisitor {
@@ -102,5 +103,16 @@ public class UpdateJavaSyntaxTreeStep2Visitor extends AbstractJavaSyntaxVisitor 
         cfed.getBodyDeclaration().accept(this);
         initEnumVisitor.visit(cfed.getBodyDeclaration());
         cfed.setConstants(initEnumVisitor.getConstants());
+    }
+
+    @Override
+    public void visit(RecordDeclaration declaration) {
+        this.typeDeclaration = declaration;
+        safeAccept(declaration.getBodyDeclaration());
+        
+        // Remove 'static', 'final' and 'abstract' flags
+        ClassFileRecordDeclaration cfrd = (ClassFileRecordDeclaration) declaration;
+
+        cfrd.setFlags(cfrd.getFlags() & ~(Declaration.FLAG_STATIC|Declaration.FLAG_FINAL|Declaration.FLAG_ABSTRACT));
     }
 }

@@ -29,6 +29,7 @@ public interface DeclarationVisitor {
     void visit(MethodDeclaration declaration);
     void visit(MemberDeclarations declarations);
     void visit(ModuleDeclaration declarations);
+    void visit(RecordDeclaration declaration);
     void visit(StaticInitializerDeclaration declaration);
     void visit(TypeDeclarations declarations);
 }

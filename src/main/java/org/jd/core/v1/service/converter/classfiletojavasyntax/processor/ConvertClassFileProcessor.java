@@ -70,7 +70,9 @@ public class ConvertClassFileProcessor implements Processor {
             typeDeclaration = convertModuleDeclaration(classFile);
         } else if (classFile.isInterface()) {
             typeDeclaration = convertInterfaceDeclaration(typeMaker, annotationConverter, classFile, null);
-        } else {
+        } else if(classFile.isRecord()) {
+        	typeDeclaration = convertRecordDeclaration(typeMaker, annotationConverter, classFile, null);
+    	} else {
             typeDeclaration = convertClassDeclaration(typeMaker, annotationConverter, classFile, null);
         }
 
@@ -99,6 +101,17 @@ public class ConvertClassFileProcessor implements Processor {
                 annotationReferences, classFile.getAccessFlags(),
                 typeTypes.thisType.getInternalName(), typeTypes.thisType.getName(),
                 typeTypes.interfaces, bodyDeclaration);
+    }
+    
+    protected ClassFileRecordDeclaration convertRecordDeclaration(TypeMaker parser, AnnotationConverter converter, ClassFile classFile, ClassFileBodyDeclaration outerClassFileBodyDeclaration) {
+        BaseAnnotationReference annotationReferences = convertAnnotationReferences(converter, classFile);
+        TypeMaker.TypeTypes typeTypes = parser.parseClassFileSignature(classFile);
+        ClassFileRecordBodyDeclaration bodyDeclaration = convertRecordBodyDeclaration(parser, converter, classFile, typeTypes.typeParameters, outerClassFileBodyDeclaration);
+
+        return new ClassFileRecordDeclaration(
+        		annotationReferences, classFile.getAccessFlags(),
+                typeTypes.thisType.getInternalName(), typeTypes.thisType.getName(),
+                typeTypes.typeParameters, typeTypes.interfaces, bodyDeclaration);
     }
 
     protected ClassFileAnnotationDeclaration convertAnnotationDeclaration(TypeMaker parser, AnnotationConverter converter, ClassFile classFile, ClassFileBodyDeclaration outerClassFileBodyDeclaration) {
@@ -142,6 +155,32 @@ public class ConvertClassFileProcessor implements Processor {
         }
 
         ClassFileBodyDeclaration bodyDeclaration = new ClassFileBodyDeclaration(classFile, bindings, typeBounds, outerClassFileBodyDeclaration);
+
+        bodyDeclaration.setFieldDeclarations(convertFields(parser, converter, classFile));
+        bodyDeclaration.setMethodDeclarations(convertMethods(parser, converter, bodyDeclaration, classFile));
+        bodyDeclaration.setInnerTypeDeclarations(convertInnerTypes(parser, converter, classFile, bodyDeclaration));
+
+        return bodyDeclaration;
+    }
+    
+    protected ClassFileRecordBodyDeclaration convertRecordBodyDeclaration(TypeMaker parser, AnnotationConverter converter, ClassFile classFile, BaseTypeParameter typeParameters, ClassFileBodyDeclaration outerClassFileBodyDeclaration) {
+        Map<String, TypeArgument> bindings;
+        Map<String, BaseType> typeBounds;
+
+        if (!classFile.isStatic() && (outerClassFileBodyDeclaration != null)) {
+            bindings = outerClassFileBodyDeclaration.getBindings();
+            typeBounds = outerClassFileBodyDeclaration.getTypeBounds();
+        } else {
+            bindings = Collections.emptyMap();
+            typeBounds = Collections.emptyMap();
+        }
+
+        if (typeParameters != null) {
+            populateBindingsWithTypeParameterVisitor.init(bindings=new HashMap<>(bindings), typeBounds=new HashMap<>(typeBounds));
+            typeParameters.accept(populateBindingsWithTypeParameterVisitor);
+        }
+
+        ClassFileRecordBodyDeclaration bodyDeclaration = new ClassFileRecordBodyDeclaration(classFile, bindings, typeBounds, outerClassFileBodyDeclaration);
 
         bodyDeclaration.setFieldDeclarations(convertFields(parser, converter, classFile));
         bodyDeclaration.setMethodDeclarations(convertMethods(parser, converter, bodyDeclaration, classFile));
@@ -258,6 +297,8 @@ public class ConvertClassFileProcessor implements Processor {
                     innerTypeDeclaration = convertAnnotationDeclaration(parser, converter, innerClassFile, outerClassFileBodyDeclaration);
                 } else if (innerClassFile.isInterface()) {
                     innerTypeDeclaration = convertInterfaceDeclaration(parser, converter, innerClassFile, outerClassFileBodyDeclaration);
+                } else if (innerClassFile.isRecord()) {
+                    innerTypeDeclaration = convertRecordDeclaration(parser, converter, innerClassFile, outerClassFileBodyDeclaration);
                 } else {
                     innerTypeDeclaration = convertClassDeclaration(parser, converter, innerClassFile, outerClassFileBodyDeclaration);
                 }

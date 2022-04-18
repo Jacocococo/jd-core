@@ -182,6 +182,7 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
 
         @Override public void visit(ClassDeclaration declaration) { safeAccept(declaration.getBodyDeclaration()); }
         @Override public void visit(EnumDeclaration declaration) { safeAccept(declaration.getBodyDeclaration()); }
+        @Override public void visit(RecordDeclaration declaration) { safeAccept(declaration.getBodyDeclaration()); }
         @Override public void visit(InterfaceDeclaration declaration) {}
         @Override public void visit(AnnotationDeclaration declaration) {}
 

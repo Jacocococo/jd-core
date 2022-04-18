@@ -95,6 +95,11 @@ public class UpdateBridgeMethodTypeVisitor extends AbstractJavaSyntaxVisitor {
     public void visit(InterfaceDeclaration declaration) {
         safeAccept(declaration.getBodyDeclaration());
     }
+    
+    @Override
+    public void visit(RecordDeclaration declaration) {
+        safeAccept(declaration.getBodyDeclaration());
+    }
 
     @Override public void visit(AnnotationDeclaration declaration) {}
     @Override public void visit(EnumDeclaration declaration) {}
