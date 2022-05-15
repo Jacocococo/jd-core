@@ -12,7 +12,6 @@ import org.jd.core.v1.model.javasyntax.type.TypeArgument;
 
 public class ClassFileRecordBodyDeclaration extends ClassFileBodyDeclaration {
 	private FormalParameters formalParameters = new FormalParameters();
-	private boolean hasStaticFields = false;
 	
 	public ClassFileRecordBodyDeclaration(ClassFile classFile, Map<String, TypeArgument> bindings,
 			Map<String, BaseType> typeBounds, ClassFileBodyDeclaration outerBodyDeclaration) {
@@ -31,8 +30,6 @@ public class ClassFileRecordBodyDeclaration extends ClassFileBodyDeclaration {
         			FormalParameter formalParameter = new FormalParameter(e.getType(),
         					e.getFieldDeclarators().getFirst().getName());
         			formalParameters.add(formalParameter);
-        		} else {
-        			hasStaticFields = true;
         		}
         		return e;
         	}).collect(Collectors.toList());
@@ -44,8 +41,10 @@ public class ClassFileRecordBodyDeclaration extends ClassFileBodyDeclaration {
 	public void setMethodDeclarations(List<ClassFileConstructorOrMethodDeclaration> methodDeclarations) {
         super.setMethodDeclarations(methodDeclarations);
 		if (methodDeclarations != null) {
-			int firstLineNumber = methodDeclarations.get(methodDeclarations.size() - 1).getFirstLineNumber() // order is reversed so we get last element
-					- (hasStaticFields ? 1 : 0);
+			int firstLineNumber = methodDeclarations.stream().filter(e -> { 
+				return !e.getMethod().getName().contains("lambda$") // only lambdas and static scopes comes after
+						&& !e.getMethod().getName().contains("<clinit>");
+			}).reduce((first, second) -> second).get().getFirstLineNumber(); // Last element will now be the right one
 			this.methodDeclarations = methodDeclarations.stream().map(e -> {
         		if(e.getFirstLineNumber() == firstLineNumber)
         			e.setFlags(e.getFlags() | FLAG_SYNTHETIC);
