@@ -31,5 +31,7 @@ public abstract class AbstractNopDeclarationVisitor implements DeclarationVisito
     @Override public void visit(ModuleDeclaration declarations) {}
     @Override public void visit(StaticInitializerDeclaration declaration) {}
     @Override public void visit(RecordDeclaration declaration) {}
+    @Override public void visit(RecordComponentDeclaration declaration) {}
+    @Override public void visit(RecordComponentDeclarations declaration) {}
     @Override public void visit(TypeDeclarations declaration) {}
 }

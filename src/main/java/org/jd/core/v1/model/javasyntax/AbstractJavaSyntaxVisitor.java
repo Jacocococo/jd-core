@@ -190,6 +190,20 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeArgumentVisi
     }
 
     @Override
+    public void visit(RecordComponentDeclaration declaration) {
+        BaseType type = declaration.getType();
+
+        type.accept(this);
+        safeAccept(declaration.getAnnotationReferences());
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void visit(RecordComponentDeclarations declarations) {
+        acceptListDeclaration(declarations);
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
     public void visit(TypeDeclarations list) {
         acceptListDeclaration(list);

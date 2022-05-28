@@ -12,6 +12,7 @@ import org.jd.core.v1.api.loader.LoaderException;
 import org.jd.core.v1.model.classfile.ClassFile;
 import org.jd.core.v1.model.classfile.Field;
 import org.jd.core.v1.model.classfile.Method;
+import org.jd.core.v1.model.classfile.RecordComponent;
 import org.jd.core.v1.model.classfile.attribute.*;
 import org.jd.core.v1.model.javasyntax.expression.BaseExpression;
 import org.jd.core.v1.model.javasyntax.expression.Expression;
@@ -208,6 +209,17 @@ public class TypeMaker {
         String key = classFile.getInternalTypeName() + ':' + field.getName();
         AttributeSignature attributeSignature = field.getAttribute("Signature");
         String signature = (attributeSignature == null) ? field.getDescriptor() : attributeSignature.getSignature();
+        Type type = makeFromSignature(signature);
+
+        internalTypeNameFieldNameToType.put(key, type);
+
+        return type;
+    }
+
+    public Type parseRecordComponentSignature(ClassFile classFile, RecordComponent component) {
+        String key = classFile.getInternalTypeName() + ':' + component.getName();
+        AttributeSignature attributeSignature = component.getAttribute("Signature");
+        String signature = (attributeSignature == null) ? component.getDescriptor() : attributeSignature.getSignature();
         Type type = makeFromSignature(signature);
 
         internalTypeNameFieldNameToType.put(key, type);

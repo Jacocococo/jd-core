@@ -12,6 +12,7 @@ import org.jd.core.v1.model.classfile.ClassFile;
 import org.jd.core.v1.model.classfile.ConstantPool;
 import org.jd.core.v1.model.classfile.Field;
 import org.jd.core.v1.model.classfile.Method;
+import org.jd.core.v1.model.classfile.RecordComponent;
 import org.jd.core.v1.model.classfile.attribute.*;
 import org.jd.core.v1.model.classfile.constant.*;
 import org.jd.core.v1.util.DefaultList;
@@ -334,6 +335,9 @@ public class ClassFileDeserializer {
                         if (attributeLength != 0)
                             throw new ClassFileFormatException("Invalid attribute length");
                         attributes.put(name, new AttributeSynthetic());
+                        break;
+                    case "Record":
+                        attributes.put(name, new AttributeRecord(loadRecordComponents(reader, constants)));
                         break;
                     default:
                         attributes.put(name, new UnknownAttribute());
@@ -686,5 +690,22 @@ public class ClassFileDeserializer {
         }
 
         return parameterAnnotations;
+    }
+
+    protected RecordComponent[] loadRecordComponents(ClassFileReader reader, ConstantPool constants) {
+        int count = reader.readUnsignedShort();
+        if (count == 0)
+            return null;
+
+        RecordComponent[] recordComponent = new RecordComponent[count];
+
+        for (int i=0; i < count; i++) {
+            recordComponent[i] = new RecordComponent(
+                    constants.getConstantUtf8(reader.readUnsignedShort()),
+                    constants.getConstantUtf8(reader.readUnsignedShort()),
+                    loadAttributes(reader, constants));
+        }
+
+        return recordComponent;
     }
 }

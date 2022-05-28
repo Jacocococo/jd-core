@@ -39,7 +39,7 @@ public class LayoutFragmentProcessor implements Processor {
         Map<String, Object> configuration = message.getHeader("configuration");
         Object realignLineNumbersConfiguration = (configuration == null) ? "false" : configuration.get("realignLineNumbers");
         boolean realignLineNumbers = (realignLineNumbersConfiguration == null) ? false : "true".equals(realignLineNumbersConfiguration.toString());
-        
+
         List<Fragment> fragments = message.getBody();
 
         if ((maxLineNumber != UNKNOWN_LINE_NUMBER) && !containsByteCode && !showBridgeAndSynthetic && realignLineNumbers) {

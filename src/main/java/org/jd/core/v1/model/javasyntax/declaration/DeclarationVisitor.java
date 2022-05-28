@@ -32,4 +32,6 @@ public interface DeclarationVisitor {
     void visit(RecordDeclaration declaration);
     void visit(StaticInitializerDeclaration declaration);
     void visit(TypeDeclarations declarations);
+    void visit(RecordComponentDeclaration recordComponentDeclaration);
+    void visit(RecordComponentDeclarations recordComponentDeclarations);
 }

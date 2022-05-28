@@ -750,6 +750,42 @@ public class CompilationUnitVisitor extends StatementVisitor {
     }
 
     @Override
+    public void visit(RecordComponentDeclaration declaration) {
+        BaseAnnotationReference annotationReferences = declaration.getAnnotationReferences();
+
+        if (annotationReferences != null) {
+            annotationReferences.accept(this);
+            tokens.add(TextToken.SPACE);
+        }
+
+        BaseType type = declaration.getType();
+
+        type.accept(this);
+        tokens.add(TextToken.SPACE);
+
+        String name = declaration.getName();
+
+        tokens.add(newTextToken(name));
+        currentMethodParamNames.add(name);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void visit(RecordComponentDeclarations declarations) {
+        int size = declarations.size();
+
+        if (size > 0) {
+            Iterator<RecordComponentDeclaration> iterator = declarations.iterator();
+            iterator.next().accept(this);
+
+            for (int i = 1; i < size; i++) {
+                tokens.add(TextToken.COMMA_SPACE);
+                iterator.next().accept(this);
+            }
+        }
+    }
+
+    @Override
     public void visit(InstanceInitializerDeclaration declaration) {
         BaseStatement statements = declaration.getStatements();
 
@@ -831,23 +867,23 @@ public class CompilationUnitVisitor extends StatementVisitor {
             fragments.add(StartMovableJavaBlockFragment.START_MOVABLE_TYPE_BLOCK);
 
             buildFragmentsForClassOrInterfaceOrRecordDeclaration(declaration, declaration.getFlags(), RECORD);
-            
+
             tokens.add(StartBlockToken.START_DECLARATION_OR_STATEMENT_BLOCK);
 
-            BaseFormalParameter formalParameters = declaration.getFormalParameters();
+            BaseRecordComponentDeclaration componentDeclarations = declaration.getRecordComponentDeclarations();
 
-            if (formalParameters == null) {
+            if (componentDeclarations == null) {
                 tokens.add(TextToken.LEFTRIGHTROUNDBRACKETS);
             } else {
                 tokens.add(StartBlockToken.START_PARAMETERS_BLOCK);
                 fragments.addTokensFragment(tokens);
 
-                formalParameters.accept(this);
+                componentDeclarations.accept(this);
 
                 tokens = new Tokens();
                 tokens.add(EndBlockToken.END_PARAMETERS_BLOCK);
             }
-            
+
             // Build fragments for interfaces
             BaseType interfaces = declaration.getInterfaces();
             if (interfaces != null) {
